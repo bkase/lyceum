@@ -1,0 +1,14 @@
+# Nix
+result
+result-*
+
+# macOS
+.DS_Store
+
+# Secrets (extra safety)
+*.age
+keys.txt
+
+# Direnv
+.direnv/
+.envrc.local
