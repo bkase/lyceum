@@ -9,9 +9,10 @@ This is a declarative macOS configuration using Nix, nix-darwin, and home-manage
 ## Key Commands
 
 ### System Management
-- **Rebuild system**: `darwin-rebuild switch --flake ~/.config/nix`
+- **Rebuild system**: `sudo darwin-rebuild switch --flake ~/.config/nix`
 - **Update flake inputs**: `nix flake update`
-- **Update and rebuild**: `cd ~/.config/nix && nix flake update && darwin-rebuild switch --flake .`
+- **Update and rebuild**: `cd ~/.config/nix && nix flake update && sudo darwin-rebuild switch --flake .`
+- **Important**: Always `git add` new files before rebuilding, as nix flakes only see tracked files
 
 ### Development Shell
 - **Enter dev shell with tools**: `nix develop` (provides jq, ripgrep, fd, etc.)

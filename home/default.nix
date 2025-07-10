@@ -1,4 +1,7 @@
 { config, pkgs, inputs, username, ... }:
+let
+  cx = pkgs.callPackage ../pkgs/comma-headless.nix { };
+in
 
 {
   home = {
@@ -9,25 +12,26 @@
 
   programs.home-manager.enable = true;
 
-  imports = [
-    inputs.sops-nix.homeManagerModules.sops
-  ];
+  # Temporarily disabled sops while migrating to unstable
+  # imports = [
+  #   inputs.sops-nix.homeManagerModules.sops
+  # ];
 
-  sops = {
-    enable = true;
-    # defaultSopsFile = ../secrets/env.sops;  # Uncomment when secrets exist
-    age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
-    
-    # Define secret sources when you have them:
-    # secrets."api-keys" = { 
-    #   source = ../secrets/env.sops; 
-    #   format = "dotenv"; 
-    # };
-    # secrets."gh-hosts" = {
-    #   source = ../secrets/gh/hosts.yml;
-    #   target = "${config.home.homeDirectory}/.config/gh/hosts.yml";
-    # };
-  };
+  # sops = {
+  #   enable = true;
+  #   # defaultSopsFile = ../secrets/env.sops;  # Uncomment when secrets exist
+  #   age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
+  #   
+  #   # Define secret sources when you have them:
+  #   # secrets."api-keys" = { 
+  #   #   source = ../secrets/env.sops; 
+  #   #   format = "dotenv"; 
+  #   # };
+  #   # secrets."gh-hosts" = {
+  #   #   source = ../secrets/gh/hosts.yml;
+  #   #   target = "${config.home.homeDirectory}/.config/gh/hosts.yml";
+  #   # };
+  # };
 
   home.sessionVariables = {
     EDITOR = "nvim";
@@ -46,7 +50,6 @@
     tmux
     fzf
     zoxide
-    starship
     direnv
     sops
     age
@@ -56,6 +59,11 @@
     gawk
     findutils
     mas  # Mac App Store CLI
+    scmpuff      # Git status helper
+    fasd         # Quick access to files and directories
+    vivid        # LS_COLORS generator
+    comma        # Run software without installing
+    cx           # Headless comma for Claude
   ];
 
   # Mac App Store applications
@@ -67,53 +75,10 @@
   #   ];
   # };
 
-  # Homebrew Casks (GUI applications)
-  # home.casks = [
-  #   # Add your Homebrew cask apps here
-  #   # Example: "visual-studio-code"
-  #   # "1password"
-  #   # "slack"
-  # ];
-
-  programs.zsh = {
-    enable = true;
-    enableCompletion = true;
-    autosuggestion.enable = true;
-    syntaxHighlighting.enable = true;
-    
-    initExtra = ''
-      # Zoxide
-      eval "$(zoxide init zsh)"
-      
-      # Starship
-      eval "$(starship init zsh)"
-      
-      # Direnv
-      eval "$(direnv hook zsh)"
-      
-      # Mise
-      eval "$(mise activate zsh)"
-      
-      # FZF
-      source ${pkgs.fzf}/share/fzf/completion.zsh
-      source ${pkgs.fzf}/share/fzf/key-bindings.zsh
-    '';
-    
-    shellAliases = {
-      ll = "ls -la";
-      la = "ls -la";
-      l = "ls -l";
-      g = "git";
-      v = "nvim";
-      rebuild = "darwin-rebuild switch --flake ~/.config/nix";
-      update = "cd ~/.config/nix && nix flake update && rebuild";
-    };
-  };
-
   programs.git = {
     enable = true;
     userName = "bkase";
-    userEmail = "bkase@example.com";
+    userEmail = "brandernan@gmail.com";
     
     extraConfig = {
       init.defaultBranch = "main";
@@ -121,17 +86,6 @@
       pull.rebase = true;
       rebase.autoStash = true;
       core.editor = "nvim";
-    };
-  };
-
-  programs.starship = {
-    enable = true;
-    settings = {
-      format = "$all$character";
-      character = {
-        success_symbol = "[➜](bold green)";
-        error_symbol = "[➜](bold red)";
-      };
     };
   };
 
@@ -182,10 +136,11 @@
     enable = true;
     enableZshIntegration = true;
     git = true;
-    icons = true;
+    icons = "auto";
   };
 
   home.file = {
     ".config/nvim".source = ../dotfiles/nvim;
+    ".config/ghostty/config".source = ../dotfiles/ghostty/config;
   };
 }

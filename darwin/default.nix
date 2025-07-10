@@ -1,36 +1,23 @@
 { config, pkgs, inputs, username, hostname, ... }:
 
 {
+  # Set primary user for system defaults
+  system.primaryUser = username;
   users.users.${username} = {
     home = "/Users/${username}";
     shell = pkgs.zsh;
   };
 
-  nix = {
-    package = pkgs.nix;
-    
-    settings = {
-      experimental-features = [ "nix-command" "flakes" ];
-      trusted-users = [ username ];
-      warn-dirty = false;
-      auto-optimise-store = true;
-    };
-    
-    gc = {
-      automatic = true;
-      interval = { Day = 7; };
-      options = "--delete-older-than 30d";
-    };
-  };
+  # Disable nix-darwin's Nix management for Determinate Nix
+  nix.enable = false;
 
   networking = {
     hostName = hostname;
     computerName = hostname;
   };
 
-  services.nix-daemon.enable = true;
+  # nix-daemon is now managed automatically by nix-darwin
 
-  programs.zsh.enable = true;
 
   homebrew = {
     enable = true;
@@ -42,24 +29,40 @@
     
     taps = [];
     brews = [];
-    casks = [];
+    casks = [
+      "lm-studio"
+      "torguard"
+      "claude"
+      "cursor"
+      "google-chrome"
+      "granola"
+      "arq"
+      "vibetunnel"
+      "ghostty"
+    ];
+    
+    masApps = {
+      "Tailscale" = 1475387142;
+    };
   };
 
   services.tailscale.enable = true;
 
-  # XCode Command Line Tools
-  # Note: XCode itself must be installed manually from the App Store
-  # programs.xcode.enable = true;  # Uncomment if needed
-
   system = {
     stateVersion = 5;
+
+    keyboard = {
+      enableKeyMapping = true;
+      remapCapsLockToControl = true;
+    };
     
     defaults = {
       NSGlobalDomain = {
         AppleInterfaceStyle = "Dark";
         ApplePressAndHoldEnabled = false;
-        KeyRepeat = 2;
-        InitialKeyRepeat = 10;
+        "com.apple.swipescrolldirection" = false;
+        KeyRepeat = 1;
+        InitialKeyRepeat = 12;
         NSAutomaticCapitalizationEnabled = false;
         NSAutomaticDashSubstitutionEnabled = false;
         NSAutomaticPeriodSubstitutionEnabled = false;
@@ -69,7 +72,7 @@
 
       dock = {
         autohide = true;
-        orientation = "bottom";
+        orientation = "left";
         show-recents = false;
         tilesize = 48;
         mru-spaces = false;
@@ -89,5 +92,5 @@
     };
   };
 
-  security.pam.enableSudoTouchIdAuth = true;
+  security.pam.services.sudo_local.touchIdAuth = true;
 }
