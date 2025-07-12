@@ -39,6 +39,7 @@
       "arq"
       "vibetunnel"
       "ghostty"
+      "obsidian"
     ];
     
     masApps = {
