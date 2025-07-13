@@ -37,7 +37,7 @@ git_squash_second_with_initial() {
 #register hooks
 autoload -U add-zsh-hook && add-zsh-hook chpwd record_pwd
 
-export LS_COLORS=$(vivid generate gruvbox-light)
+# LS_COLORS will be set after mise is activated
 
 #cd to the most recent place
 touch /tmp/.cwd
@@ -46,7 +46,7 @@ cd `cat /tmp/.cwd`
 
 # TODO: Why do my aliases not work in environment.shellAliases anymore
 alias vi="vim"
-alias ls="exa --group-directories-first"
+alias ls="eza --group-directories-first"
 alias l="ls"
 alias mv="mv -i"
 alias cp="cp -i"
@@ -146,3 +146,6 @@ export WASMER_DIR="/Users/bkase/.wasmer"
 eval "$(direnv hook zsh)"
 
 eval "$(mise activate zsh)"
+
+# Set LS_COLORS after mise tools are available
+export LS_COLORS=$(vivid generate gruvbox-light)
