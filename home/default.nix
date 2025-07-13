@@ -39,31 +39,52 @@ in
     LANG = "en_US.UTF-8";
     LC_ALL = "en_US.UTF-8";
     
+    # Mise configuration
+    MISE_DEFAULT_TOOL_VERSIONS_FILENAME = ".mise.toml";
+    MISE_DEFAULT_CONFIG_FILENAME = ".mise.toml";
+    
     # Add secret environment variables when secrets are configured:
     # OPENAI_API_KEY = config.sops.secrets."api-keys".value;
     # GITHUB_TOKEN = config.sops.secrets."api-keys".value;
   };
 
   home.packages = with pkgs; [
+    # Version control
     git
+    
+    # Editors
     neovim
+    
+    # Terminal multiplexer
     tmux
+    
+    # Shell enhancements
     fzf
     zoxide
     direnv
-    sops
-    age
-    mise
+    
+    # System utilities
     coreutils
     gnused
     gawk
     findutils
-    mas  # Mac App Store CLI
-    scmpuff      # Git status helper
-    fasd         # Quick access to files and directories
-    vivid        # LS_COLORS generator
-    comma        # Run software without installing
-    cx           # Headless comma for Claude
+    
+    # macOS specific
+    mas
+    
+    # Nix-specific tools
+    sops
+    age
+    
+    # Tool management
+    mise
+    
+    # Shell integration
+    scmpuff
+    fasd
+    
+    # Your custom tools
+    cx  # comma replacement
   ];
 
   # Mac App Store applications
@@ -79,6 +100,40 @@ in
     enable = true;
     userName = "bkase";
     userEmail = "brandernan@gmail.com";
+    
+    ignores = [
+      # macOS
+      ".DS_Store"
+      ".AppleDouble"
+      ".LSOverride"
+      "._*"
+      
+      # Editor swap files
+      "*.swp"
+      "*.swo"
+      "*~"
+      
+      # mise-specific
+      ".mise.local.toml"
+      ".mise/cache/"
+      
+      # Direnv
+      ".direnv/"
+      ".envrc.local"
+      
+      # IDE files
+      ".idea/"
+      ".vscode/"
+      "*.sublime-*"
+      
+      # Logs and databases
+      "*.log"
+      "*.sqlite"
+      
+      # Environment files
+      ".env.local"
+      ".env.*.local"
+    ];
     
     extraConfig = {
       init.defaultBranch = "main";
@@ -124,19 +179,49 @@ in
     };
   };
 
-  programs.bat = {
-    enable = true;
-    config = {
-      theme = "TwoDark";
-      pager = "less -FR";
-    };
-  };
 
-  programs.eza = {
+  programs.mise = {
     enable = true;
     enableZshIntegration = true;
-    git = true;
-    icons = "auto";
+    
+    # Global defaults - loose constraints that projects can override
+    globalConfig = {
+      tools = {
+        # Language runtimes with flexible versions
+        node = "lts";        # Currently v22 LTS (v22.17.0)
+        python = "3.12";     # Recommended stable (3.11 also good)
+        go = "1.24";         # Latest stable (1.24.5)
+        rust = "stable";     # Latest stable (1.88.0)
+        
+        # Global CLI tools
+        "cargo:eza" = "latest";        # Modern ls replacement
+        "cargo:vivid" = "latest";      # LS_COLORS generator
+        
+        # npm packages
+        "npm:@anthropic-ai/claude-code" = "1.0";  # Claude Code CLI
+        "npm:ccusage" = "latest";                  # Claude usage tracking
+        
+        # iOS/macOS development
+        tuist = "latest";                          # Xcode project generation
+      };
+    };
+    
+    settings = {
+      # Support legacy version files from other tools
+      legacy_version_file = true;  # .nvmrc, .python-version, etc.
+      
+      # Don't auto-install missing tools (explicit is better)
+      experimental = false;
+      
+      # Disable specific tools if needed
+      disable_tools = [];
+      
+      # Trusted configuration files (avoid security prompts)
+      trusted_config_paths = [
+        "~/.config/mise"
+        "~/Projects"  # Adjust to your project root
+      ];
+    };
   };
 
   home.file = {
