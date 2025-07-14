@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, username, ... }:
+{ config, pkgs, lib, inputs, username, ... }:
 let
   cx = pkgs.callPackage ../pkgs/comma-headless.nix { };
 in
@@ -226,7 +226,15 @@ in
   };
 
   home.file = {
-    ".config/nvim".source = ../dotfiles/nvim;
+    # nvim config is symlinked manually via activation script to allow writes
     ".config/ghostty/config".source = ../dotfiles/ghostty/config;
   };
+  
+  # Create a manual symlink for nvim to allow LazyVim to write files
+  home.activation.nvimConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    if [ -L "$HOME/.config/nvim" ] || [ -e "$HOME/.config/nvim" ]; then
+      rm -rf "$HOME/.config/nvim"
+    fi
+    ln -sf "$HOME/.config/nix/dotfiles/nvim" "$HOME/.config/nvim"
+  '';
 }
