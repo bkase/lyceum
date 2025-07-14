@@ -200,6 +200,7 @@ in
         # npm packages
         "npm:@anthropic-ai/claude-code" = "1.0";  # Claude Code CLI
         "npm:ccusage" = "latest";                  # Claude usage tracking
+        "npm:@google/gemini-cli" = "latest";       # Gemini CLI
         
         # iOS/macOS development
         tuist = "latest";                          # Xcode project generation
