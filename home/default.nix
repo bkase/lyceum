@@ -228,6 +228,12 @@ in
   home.file = {
     # nvim config is symlinked manually via activation script to allow writes
     ".config/ghostty/config".source = ../dotfiles/ghostty/config;
+    
+    # Claude commands directory
+    ".claude/commands" = {
+      source = ../dotfiles/claude-commands;
+      recursive = true;
+    };
   };
   
   # Create a manual symlink for nvim to allow LazyVim to write files
