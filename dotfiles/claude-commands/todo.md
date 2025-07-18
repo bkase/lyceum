@@ -176,7 +176,20 @@ Structured workflow to transform vague todos into implemented features using git
    - `git mv analysis.md todos/done/[timestamp]-[task-title-slug]-analysis.md`
 5. Commit all changes: `git add -A && git commit -m "Complete"`
 6. Push branch to remote and create pull request using GitHub CLI
-7. STOP → "PR created. Delete the worktree? (y/n)"
-   - If yes: `git -C "$(git rev-parse --show-toplevel)" worktree remove todos/worktrees/[timestamp]-[task-title-slug]`
+7. STOP → "PR created. Delete the worktree? (y/n/rebase)"
+   - When yes: `git -C "$(git rev-parse --show-toplevel)" worktree remove todos/worktrees/[timestamp]-[task-title-slug]`
+   - If rebase:
+     - rebase against master and force push the branch for the PR
+   - If anything other than yes:
+     - Pause and propose a new checkbox for the plan in the `todos/done/[timestamp]-[task-title-slug].md`
+     - STOP → "Add this new checkbox to the plan? (y/n)"
+     - Add new checkbox to the `todos/done/[timestamp]-[task-title-slug].md`
+     - For the current checkbox:
+       - Make code changes
+       - Summarize changes
+       - STOP → "Approve these changes? (y/n)"
+     - Mark checkbox complete in `task.md`
+     - Commit progress, including added/modified/deleted files: `git add -A && git commit -m "[text of checkbox]"`
+     - And push to update to the branch for the PR
+     - Finally, loop back to 7 (but say PR updated instead of PR created)
    - Note: If Claude was spawned in the worktree, the working directory will become invalid after removal
-
