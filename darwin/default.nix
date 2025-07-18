@@ -59,7 +59,7 @@
     
     defaults = {
       NSGlobalDomain = {
-        AppleInterfaceStyle = "Dark";
+        AppleInterfaceStyle = null;
         ApplePressAndHoldEnabled = false;
         "com.apple.swipescrolldirection" = false;
         KeyRepeat = 1;
