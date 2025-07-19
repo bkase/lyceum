@@ -40,6 +40,7 @@
       "vibetunnel"
       "ghostty"
       "obsidian"
+      "iina"
     ];
     
     masApps = {
