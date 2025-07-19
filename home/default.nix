@@ -236,11 +236,21 @@ in
     };
   };
   
-  # Create a manual symlink for nvim to allow LazyVim to write files
-  home.activation.nvimConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    if [ -L "$HOME/.config/nvim" ] || [ -e "$HOME/.config/nvim" ]; then
-      rm -rf "$HOME/.config/nvim"
-    fi
-    ln -sf "$HOME/.config/nix/dotfiles/nvim" "$HOME/.config/nvim"
-  '';
+  # Create manual symlinks for directories that need write access
+  home.activation = {
+    nvimConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      if [ -L "$HOME/.config/nvim" ] || [ -e "$HOME/.config/nvim" ]; then
+        rm -rf "$HOME/.config/nvim"
+      fi
+      ln -sf "$HOME/.config/nix/dotfiles/nvim" "$HOME/.config/nvim"
+    '';
+    
+    claudeConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      mkdir -p "$HOME/.claude"
+      if [ -L "$HOME/.claude/CLAUDE.md" ] || [ -e "$HOME/.claude/CLAUDE.md" ]; then
+        rm -f "$HOME/.claude/CLAUDE.md"
+      fi
+      ln -sf "$HOME/.config/nix/dotfiles/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+    '';
+  };
 }
