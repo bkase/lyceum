@@ -41,6 +41,7 @@
       "ghostty"
       "obsidian"
       "iina"
+      "zed"
     ];
     
     masApps = {

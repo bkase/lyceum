@@ -38,15 +38,19 @@ in
     BROWSER = "open";
     LANG = "en_US.UTF-8";
     LC_ALL = "en_US.UTF-8";
-    
+
     # Mise configuration
     MISE_DEFAULT_TOOL_VERSIONS_FILENAME = ".mise.toml";
     MISE_DEFAULT_CONFIG_FILENAME = ".mise.toml";
-    
+
     # Add secret environment variables when secrets are configured:
     # OPENAI_API_KEY = config.sops.secrets."api-keys".value;
     # GITHUB_TOKEN = config.sops.secrets."api-keys".value;
   };
+
+  home.sessionPath = [
+    "$HOME/.local/bin"
+  ];
 
   home.packages = with pkgs; [
     # Version control
@@ -79,9 +83,15 @@ in
     # Tool management
     mise
     
+    # File watching
+    watchman
+    
     # Shell integration
     scmpuff
     fasd
+    
+    # Networking
+    cloudflared
     
     # Your custom tools
     cx  # comma replacement
@@ -166,6 +176,14 @@ in
     '';
   };
 
+  programs.zsh = {
+    enable = true;
+    initExtra = ''
+      # Add ~/.local/bin to PATH
+      export PATH="$HOME/.local/bin:$PATH"
+    '';
+  };
+
   programs.fzf = {
     enable = true;
     enableZshIntegration = true;
@@ -198,9 +216,14 @@ in
         "cargo:vivid" = "latest";      # LS_COLORS generator
         
         # npm packages
+        "npm:pnpm" = "latest";                      # Fast, disk space efficient package manager
         "npm:@anthropic-ai/claude-code" = "1.0";  # Claude Code CLI
         "npm:ccusage" = "latest";                  # Claude usage tracking
         "npm:@google/gemini-cli" = "latest";       # Gemini CLI
+        "npm:opencode-ai" = "latest";              # OpenCode AI
+        "npm:repomix" = "latest";                  # Repository to single file converter
+        "npm:@steipete/poltergeist" = "latest";    # Website automation tool
+        "npm:@openai/codex" = "latest";            # OpenAI Codex CLI
         
         # iOS/macOS development
         tuist = "latest";                          # Xcode project generation
@@ -210,6 +233,9 @@ in
     settings = {
       # Support legacy version files from other tools
       legacy_version_file = true;  # .nvmrc, .python-version, etc.
+      
+      # Enable idiomatic version files for Python
+      idiomatic_version_file_enable_tools = ["python"];
       
       # Don't auto-install missing tools (explicit is better)
       experimental = false;
@@ -228,11 +254,17 @@ in
   home.file = {
     # nvim config is symlinked manually via activation script to allow writes
     ".config/ghostty/config".source = ../dotfiles/ghostty/config;
-    
+
     # Claude commands directory
     ".claude/commands" = {
       source = ../dotfiles/claude-commands;
       recursive = true;
+    };
+
+    # a4 development shim
+    ".local/bin/a4" = {
+      source = ../dotfiles/a4;
+      executable = true;
     };
   };
   

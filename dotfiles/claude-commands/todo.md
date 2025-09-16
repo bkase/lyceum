@@ -22,10 +22,9 @@ Structured workflow to transform vague todos into implemented features using git
    - If Status is "InProgress": Continue to IMPLEMENT
    - If Status is "AwaitingCommit": Continue to COMMIT
    - If Status is "Done": Task is complete, do nothing
-2. Add `/todos/worktrees/` to .gitignore: `rg -q "/todos/worktrees/" .gitignore || echo -e "\n/todos/worktrees/" >> .gitignore`
+2. Add `/todos/worktrees/` to .gitignore: `cx rg -q "/todos/worktrees/" .gitignore || echo -e "\n/todos/worktrees/" >> .gitignore`
 3. Read `todos/project-description.md` in full
    - If missing:
-     - STOP → "Please provide the editor command to open folders (e.g. 'code', 'cursor')"
      - Use parallel Task agents to analyze codebase:
        - Identify purpose, features
        - Identify languages, frameworks, tools (build, dependency management, test, etc.)
@@ -79,8 +78,7 @@ Structured workflow to transform vague todos into implemented features using git
    - Present numbered list of orphaned tasks
    - STOP → "Resume orphaned task? (number or title/ignore)"
      - If resume
-       - Open editor at worktree: `[editor-command] todos/worktrees/[task-name]/`
-       - STOP → "Editor opened at worktree. Run `claude "/todo"` in worktree"
+       - cd into worktree and continue the resumed task
      - else go to SELECT
 
 ### SELECT
@@ -89,9 +87,10 @@ Structured workflow to transform vague todos into implemented features using git
 2. Present numbered list of todos with one line summaries
 3. STOP → "Which todo would you like to work on? (enter number)"
 4. Remove selected todo from `todos/todos.md` and commit: `git commit -am "Remove todo: [task-title]"`
-5. Create git worktree with branch: `git worktree add -b [task-title-slug] todos/worktrees/$(date +%Y-%m-%d-%H-%M-%S)-[task-title-slug]/ HEAD`
-6. Change CWD to worktree: `cd todos/worktrees/[timestamp]-[task-title-slug]/`
-7. Initialize `task.md` from template in worktree root:
+5. Get the current timestamp: `date +%Y-%m-%d-%H-%M-%S`
+6. Create git worktree with branch: `git worktree add -b [task-title-slug] todos/worktrees/[timestamp]-[task-title-slug]/ HEAD`
+7. Change CWD to worktree: `cd todos/worktrees/[timestamp]-[task-title-slug]/`
+8. Initialize `task.md` from template in worktree root:
 
    ```markdown
    # [Task Title]
@@ -120,7 +119,7 @@ Structured workflow to transform vague todos into implemented features using git
    [Implementation notes]
    ```
 
-8. Commit and push initial task setup: `git add . && git commit -m "[task-title]: Initialization" && git push -u origin [task-title-slug]`
+9. Commit and push initial task setup: `git add . && git commit -m "[task-title]: Initialization" && git push -u origin [task-title-slug]`
 
 ### REFINE
 
@@ -134,8 +133,7 @@ Structured workflow to transform vague todos into implemented features using git
 4. Draft implementation plan → STOP → "Use this implementation plan? (y/n)"
 5. Update `task.md` with fully refined content and set `**Status**: InProgress`
 6. Commit refined plan: `git add -A && git commit -m "[task-title]: Refined plan"`
-7. Open editor at worktree: `[editor-command] todos/worktrees/[timestamp]-[task-title-slug]/`
-8. STOP → "Editor opened at worktree. Run `claude "/todo"` in worktree to start implementation"
+7. Continue to IMPLEMENT phase
 
 ### IMPLEMENT
 
@@ -150,14 +148,14 @@ Structured workflow to transform vague todos into implemented features using git
      - STOP → "Approve these changes? (y/n)"
      - Mark checkbox complete in `task.md`
      - Commit progress, including added/modified/deleted files: `git add -A && git commit -m "[text of checkbox]"`
-2. After all checkboxes are complete, run project validation (lint/test/build).
+2. After all checkboxes are complete, run project validation (fmt/lint/test/build).
    - If validation fails:
      - Report full error(s)
      - Propose one or more new checkboxes to fix the issue
      - STOP → "Add these checkboxes to the plan? (y/n)"
      - Add new checkbox(es) to implementation plan in `task.md`
      - Go to step 1 of `IMPLEMENT`.
-3. Present user test steps → STOP → "Do all user tests pass? (y/n)"
+3. If there are user test steps, present them → STOP → "Do all user tests pass? (y/n)"
 4. Check if project description needs updating:
    - If implementation changed structure, features, or commands:
      - Present proposed updates to `todos/project-description.md`
