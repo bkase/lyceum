@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(date, echo, aethel), Write
+allowed-tools: Bash(date, echo, a4), Write, Read
 description: Conduct empathetic journaling sessions with vault integration
 argument-hint: [morning|evening]
 ---
@@ -7,14 +7,6 @@ argument-hint: [morning|evening]
 # Journal Session
 
 Guide the user through a reflective journaling session with empathetic coaching and save the transcript with analysis.
-
-## Vault Integration
-
-This command now integrates with your Aethel vault:
-
-- Creates journal entries as documents in vault
-- Uses aethel CLI to write documents with proper schema
-- Preserves full transcripts with emotional analysis
 
 ## Session Flow
 
@@ -32,7 +24,14 @@ This command now integrates with your Aethel vault:
    - If `$ARGUMENTS` contains "morning" or "evening", use that
    - Otherwise, ask: "Is this a morning or evening journal session?"
 2. Exit signal is "y"
-3. Get current date: `date +%Y-%m-%d-%H-%M-%S`
+3. Determine effective date for the session:
+   - Get current hour: `date +%H`
+   - If evening session AND hour is 00-03 (midnight to 3am):
+     - Use yesterday's date: `date -d "yesterday" +%Y-%m-%d`
+     - Set timestamp: `date +%Y-%m-%d-%H-%M-%S` (for tracking actual time)
+   - Otherwise:
+     - Use current date: `date +%Y-%m-%d`
+     - Set timestamp: `date +%Y-%m-%d-%H-%M-%S`
 4. Start tracking session time for duration calculation
 
 ### CONVERSE
@@ -58,11 +57,26 @@ Then append each user response and coach reply to build complete record.
 
 #### Evening Session
 
-Start with these three questions presented together:
+1. **Check for morning session context:**
+   - Use the effective date determined in INIT (which accounts for late-night sessions)
+   - Check if morning session exists: `$(a4 root)/collections/journals/$(echo $EFFECTIVE_DATE | cut -d- -f1)/$(echo $EFFECTIVE_DATE | cut -d- -f2)/journal-${EFFECTIVE_DATE}-morning.md`
+   - If exists, read the morning session to understand:
+     - What they were grateful for
+     - How they were feeling in the morning
+     - What they hoped to get out of the day
+     - Any proposed actions or goals mentioned
+   - Use this context to inform your coaching approach and follow-up questions
+
+2. **Start with these three questions presented together:**
 
 - How has your day been?
 - How are you feeling?
 - Is there anything in particular that stood out or felt significant?
+
+3. **If morning session was found, also consider asking:**
+   - Follow up on specific goals or intentions from the morning
+   - Check in on how their feelings have evolved throughout the day
+   - Reference any challenges or opportunities they anticipated
 
 #### Conversation Loop
 
@@ -107,11 +121,26 @@ After session ends:
 ### SAVE
 
 1. Get the end date: `date +%Y-%m-%d-%H-%M-%S`
-2. Create journal entry in vault using aethel CLI:
+2. Determine file path and name:
+   - Use effective date components from INIT: `YEAR=$(echo $EFFECTIVE_DATE | cut -d- -f1)`, `MONTH=$(echo $EFFECTIVE_DATE | cut -d- -f2)`, `DAY=$(echo $EFFECTIVE_DATE | cut -d- -f3)`
+   - Filename: `journal-${EFFECTIVE_DATE}-[morning|evening].md` (based on session type)
+   - Full path: `$(a4 root)/collections/journals/$YEAR/$MONTH/journal-${EFFECTIVE_DATE}-[morning|evening].md`
+   - Create directory if needed: `mkdir -p $(a4 root)/collections/journals/$YEAR/$MONTH/`
+3. Save the file with the following format:
+   a. Format the document with frontmatter and body:
 
-   a. Format the document body with the summary, proposed actions, self-check metrics, and transcript:
+   ```markdown
+   ---
+   kind: journal.entry
+   session_type: [morning|evening]
+   emotions: [comma-separated emotions]
+   key_themes: [comma-separated themes]
+   duration: [number in minutes]
+   date: $EFFECTIVE_DATE
+   ---
 
-   ```md
+   # Journal YYYY-MM-DD [Morning|Evening]
+
    ## Summary and Key Takeaways
 
    [summary and key takeaways]
@@ -129,63 +158,26 @@ After session ends:
    [FULL VERBATIM TRANSCRIPT HERE]
    ```
 
-   b. Create JSON patch for aethel write command:
+4. Generate summary for daily note:
+   - Create a brief summary (2-3 sentences) of key insights
+   - Format as markdown with session type indicator
 
-   ```json
-   {
-     "uuid": null,
-     "type": "journal.entry",
-     "frontmatter": {
-       "session_type": "[morning|evening]",
-       "emotions": "[comma-separated emotions]",
-       "key_themes": "[comma-separated themes]",
-       "duration": [number in minutes]
-     },
-     "body": "[formatted document body from step a]",
-     "mode": "create"
-   }
-   ```
+5. Append to daily note:
+   - Determine daily note path based on $EFFECTIVE_DATE vs current date:
+     - If $EFFECTIVE_DATE equals today's date:
+       - Use: `a4 append --heading "[Morning|Evening] Journal" --anchor "journal-[morning|evening]" --today --text "$SUMMARY\n\n[[journal-YYYY-MM-DD-{morning,evening}]]"`
+     - If $EFFECTIVE_DATE is yesterday (late-night evening session):
+       - Get today's path: `TODAY_PATH=$(a4 today)` (e.g., /path/capture/2025/2025-01/2025-01-19.md)
+       - Extract base path and date: Parse the path to get directory and filename components
+       - Calculate yesterday's filename: Use `date -d "yesterday" +%Y-%m-%d` to get yesterday's date
+       - Construct yesterday's path: `$(dirname $TODAY_PATH)/$(date -d "yesterday" +%Y-%m-%d).md`
+       - Use: `a4 append --heading "Evening Journal" --anchor "journal-evening" --file "$YESTERDAY_PATH" --text "$SUMMARY\n\n[[journal-YYYY-MM-DD-evening]]"`
 
-   c. Execute write command:
-
-   ```bash
-   echo '{JSON_PATCH}' | aethel write --json - --output json
-   ```
-
-3. After successful creation:
-   - Parse the JSON response to get UUID and path
-   - Inform user: "Journal session saved to your vault at [path] with ID: [uuid]"
-
-## Error Handling
-
-### Aethel Write Failures
-
-If aethel write command fails:
-
-1. Check error code and message from JSON response
-2. Common errors:
-   - 404xx: Pack or type not found - ensure journal pack is installed
-   - 422xx: Schema validation error - check frontmatter fields
-   - 500xx: System error - check vault directory exists
-3. Fall back to saving as plain markdown file in current directory
-4. Inform user: "Unable to save to vault (error: [message]), saved locally as journal-[timestamp].md"
-
-### Special Characters in JSON
-
-Ensure JSON patch is properly escaped:
-
-- Escape quotes in strings: `\"`
-- Escape backslashes: `\\`
-- Preserve newlines in body as `\n`
-- Use proper JSON encoding for all string values
+6. After successful creation:
+   - Inform user: "Journal session saved to [path]"
+   - Confirm: "✅ Summary added to today's daily note"
 
 ## Usage Notes
-
-### Vault Storage
-
-- Journal entries are stored as Aethel documents
-- Location: `vault/docs/[uuid].md`
-- Type: `journal.entry` (requires journal pack to be installed)
 
 ### Session Types
 
@@ -206,9 +198,3 @@ Ensure JSON patch is properly escaped:
 - Insights stored in document body
 - Duration stored as integer (minutes) in frontmatter
 - Tags automatically added to document based on analysis
-
-### Prerequisites
-
-- Aethel vault must be initialized in current directory or ancestor
-- Journal pack must be installed with `journal.entry` type
-- Aethel CLI must be available in PATH
