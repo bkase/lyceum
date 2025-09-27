@@ -1,6 +1,6 @@
 font-family = PragmataPro
 font-size = 18
-theme = GruvboxLight
+theme = Gruvbox Light
 cursor-style = block
 cursor-style-blink = true
 keybind = shift+enter=text:\n
