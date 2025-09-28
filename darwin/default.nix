@@ -33,15 +33,11 @@
       "lm-studio"
       "torguard"
       "claude"
-      "cursor"
       "google-chrome"
-      "granola"
       "arq"
       "vibetunnel"
       "ghostty"
-      "obsidian"
       "iina"
-      "zed"
     ];
     
     masApps = {

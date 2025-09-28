@@ -12,27 +12,6 @@ in
 
   programs.home-manager.enable = true;
 
-  # Temporarily disabled sops while migrating to unstable
-  # imports = [
-  #   inputs.sops-nix.homeManagerModules.sops
-  # ];
-
-  # sops = {
-  #   enable = true;
-  #   # defaultSopsFile = ../secrets/env.sops;  # Uncomment when secrets exist
-  #   age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
-  #   
-  #   # Define secret sources when you have them:
-  #   # secrets."api-keys" = { 
-  #   #   source = ../secrets/env.sops; 
-  #   #   format = "dotenv"; 
-  #   # };
-  #   # secrets."gh-hosts" = {
-  #   #   source = ../secrets/gh/hosts.yml;
-  #   #   target = "${config.home.homeDirectory}/.config/gh/hosts.yml";
-  #   # };
-  # };
-
   home.sessionVariables = {
     EDITOR = "nvim";
     BROWSER = "open";
@@ -73,9 +52,6 @@ in
     gawk
     findutils
     
-    # macOS specific
-    mas
-    
     # Nix-specific tools
     sops
     age
@@ -96,15 +72,6 @@ in
     # Your custom tools
     cx  # comma replacement
   ];
-
-  # Mac App Store applications
-  # home.mas = {
-  #   enable = true;
-  #   apps = [
-  #     # Add your Mac App Store app IDs here
-  #     # Example: { id = 1234567890; name = "AppName"; }
-  #   ];
-  # };
 
   programs.git = {
     enable = true;
@@ -206,10 +173,10 @@ in
     globalConfig = {
       tools = {
         # Language runtimes with flexible versions
-        node = "lts";        # Currently v22 LTS (v22.17.0)
-        python = "3.12";     # Recommended stable (3.11 also good)
-        go = "1.24";         # Latest stable (1.24.5)
-        rust = "stable";     # Latest stable (1.88.0)
+        node = "lts";
+        python = "3.12";     # Recommended stable
+        go = "1.24";         # Latest stable
+        rust = "stable";     # Latest stable
         
         # Global CLI tools
         "cargo:eza" = "latest";        # Modern ls replacement
@@ -217,7 +184,7 @@ in
         
         # npm packages
         "npm:pnpm" = "latest";                      # Fast, disk space efficient package manager
-        "npm:@anthropic-ai/claude-code" = "1.0";  # Claude Code CLI
+        "npm:@anthropic-ai/claude-code" = "latest";  # Claude Code CLI
         "npm:ccusage" = "latest";                  # Claude usage tracking
         "npm:@google/gemini-cli" = "latest";       # Gemini CLI
         "npm:opencode-ai" = "latest";              # OpenCode AI
@@ -246,7 +213,7 @@ in
       # Trusted configuration files (avoid security prompts)
       trusted_config_paths = [
         "~/.config/mise"
-        "~/Projects"  # Adjust to your project root
+        "~/Documents"  # Adjust to your project root
       ];
     };
   };
