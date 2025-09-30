@@ -145,7 +145,7 @@ in
 
   programs.zsh = {
     enable = true;
-    initExtra = ''
+    initContent = ''
       # Add ~/.local/bin to PATH
       export PATH="$HOME/.local/bin:$PATH"
     '';
