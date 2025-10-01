@@ -59,6 +59,9 @@ in
     # Networking
     cloudflared
 
+    # Language runtimes
+    nodejs_22
+
     # CLI tools
     eza           # Modern ls replacement
     vivid         # LS_COLORS generator
