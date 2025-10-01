@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-# Change to the aethel project directory and run cargo
-cd "$HOME/Documents/aethel"
-exec cargo run --quiet -- "$@"
+# Change to the praxis project directory and use devenv to run cargo
+cd "$HOME/Documents/praxis"
+exec devenv shell -- cargo run --quiet --manifest-path core/aethel/Cargo.toml -- "$@"
