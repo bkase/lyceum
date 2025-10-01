@@ -37,7 +37,8 @@ git_squash_second_with_initial() {
 #register hooks
 autoload -U add-zsh-hook && add-zsh-hook chpwd record_pwd
 
-# LS_COLORS will be set after mise is activated
+# Set LS_COLORS using vivid
+export LS_COLORS=$(vivid generate gruvbox-light)
 
 #cd to the most recent place
 touch /tmp/.cwd
@@ -144,9 +145,7 @@ export NIX_SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt"
 export WASMER_DIR="/Users/bkase/.wasmer"
 [ -s "$WASMER_DIR/wasmer.sh" ] && source "$WASMER_DIR/wasmer.sh"
 
+# Add npm global packages to PATH
+export PATH="$HOME/.npm-global/bin:$PATH"
+
 eval "$(direnv hook zsh)"
-
-eval "$(mise activate zsh)"
-
-# Set LS_COLORS after mise tools are available
-export LS_COLORS=$(vivid generate gruvbox-light)

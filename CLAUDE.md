@@ -16,11 +16,7 @@ This is a declarative macOS configuration using Nix, nix-darwin, and home-manage
 
 ### Development Shell
 - **Enter dev shell with tools**: `nix develop` (provides jq, ripgrep, fd, etc.)
-- **Run tools on-demand**: `nix run nixpkgs#<tool>` (e.g., `nix run nixpkgs#htop`)
-
-### Secret Management
-- **Edit encrypted env vars**: `sops secrets/env.sops`
-- **Create age key**: `age-keygen -o ~/.config/sops/age/keys.txt`
+- **Run tools on-demand**: `cx <tool>` (e.g., `cx wget`, `cx htop`)
 
 ## Architecture
 
@@ -30,35 +26,36 @@ This is a declarative macOS configuration using Nix, nix-darwin, and home-manage
 ├── flake.nix          # Main entry point, defines inputs and system
 ├── darwin/            # System-level configuration
 │   └── default.nix    # macOS system settings, services
-├── home/              # User-level configuration  
-│   └── default.nix    # User packages, dotfiles, secrets
+├── home/              # User-level configuration
+│   └── default.nix    # User packages, dotfiles, npm globals
 ├── dotfiles/          # Application configs (symlinked by home-manager)
-│   └── nvim/          # Neovim configuration
-└── secrets/           # Encrypted files (sops-nix)
-    └── env.sops       # Encrypted environment variables
+│   ├── nvim/          # Neovim configuration
+│   ├── ghostty/       # Terminal emulator config
+│   └── claude-commands/ # Custom Claude Code commands
+└── zsh/               # Zsh interactive init
+    └── interactiveInit.zsh
 ```
 
 ### Key Design Principles
 
 1. **Install-Light**: Only essential tools in global PATH (git, nvim, tmux, etc.)
 2. **Declarative First**: All configuration managed through Nix files
-3. **Secrets Separation**: Sensitive data encrypted with sops-nix
-4. **Application-Owned Config**: Apps own their config files, Nix just symlinks
+3. **Application-Owned Config**: Apps own their config files, Nix just symlinks
+4. **Run on Demand**: Use `cx` for one-off commands without global installation
 
 ### Technology Stack
 
 - **nix-darwin**: System-level macOS configuration
 - **home-manager**: User environment and dotfile management
-- **sops-nix**: Encrypted secret management
-- **mise**: Language toolchain management (Node.js, Python, etc.)
 - **Homebrew**: GUI application installation (managed by nix-darwin)
+- **npm global packages**: Installed to `~/.npm-global` via home-manager activation scripts
 
 ## Important Notes
 
 1. **Dotfile Changes**: Changes to files in `~/.config/nvim` modify the Git repo directly due to symlinks. Commit these changes periodically.
 
-2. **Adding GUI Apps**: Edit `home/default.nix` to add to `home.mas.apps` (App Store) or `homebrew.casks` in `darwin/default.nix`.
+2. **Adding GUI Apps**: Edit `darwin/default.nix` (Homebrew casks) or `home/default.nix` (Mac App Store apps).
 
-3. **Language Toolchains**: Use `mise` for project-specific language versions instead of installing globally.
+3. **Language Toolchains**: Language runtimes (Node.js, Python, Go, Rust) are installed globally via Nix. For project-specific versions, use `nix develop` shells or direnv.
 
-4. **Secrets**: Never commit unencrypted secrets. Always use sops to encrypt before committing.
+4. **npm Global Packages**: Managed declaratively via activation scripts in `home/default.nix`. They're installed to `~/.npm-global/bin` and updated on every rebuild. To add a package, add it to the activation script's npm install command.

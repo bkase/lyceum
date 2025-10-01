@@ -18,10 +18,6 @@ in
     LANG = "en_US.UTF-8";
     LC_ALL = "en_US.UTF-8";
 
-    # Mise configuration
-    MISE_DEFAULT_TOOL_VERSIONS_FILENAME = ".mise.toml";
-    MISE_DEFAULT_CONFIG_FILENAME = ".mise.toml";
-
     # Add secret environment variables when secrets are configured:
     # OPENAI_API_KEY = config.sops.secrets."api-keys".value;
     # GITHUB_TOKEN = config.sops.secrets."api-keys".value;
@@ -29,46 +25,51 @@ in
 
   home.sessionPath = [
     "$HOME/.local/bin"
+    "$HOME/.npm-global/bin"
   ];
 
   home.packages = with pkgs; [
     # Version control
     git
-    
+
     # Editors
     neovim
-    
+
     # Terminal multiplexer
     tmux
-    
+
     # Shell enhancements
     fzf
     zoxide
     direnv
-    
+
     # System utilities
     coreutils
     gnused
     gawk
     findutils
-    
-    # Nix-specific tools
-    sops
-    age
-    
-    # Tool management
-    mise
-    
+
     # File watching
     watchman
-    
+
     # Shell integration
     scmpuff
     fasd
-    
+
     # Networking
     cloudflared
-    
+
+    # Language runtimes
+    nodejs_22
+    python312
+    go_1_24
+    rustup
+
+    # CLI tools
+    eza           # Modern ls replacement
+    vivid         # LS_COLORS generator
+    nodePackages.pnpm
+
     # Your custom tools
     cx  # comma replacement
   ];
@@ -77,36 +78,32 @@ in
     enable = true;
     userName = "bkase";
     userEmail = "brandernan@gmail.com";
-    
+
     ignores = [
       # macOS
       ".DS_Store"
       ".AppleDouble"
       ".LSOverride"
       "._*"
-      
+
       # Editor swap files
       "*.swp"
       "*.swo"
       "*~"
-      
-      # mise-specific
-      ".mise.local.toml"
-      ".mise/cache/"
-      
+
       # Direnv
       ".direnv/"
       ".envrc.local"
-      
+
       # IDE files
       ".idea/"
       ".vscode/"
       "*.sublime-*"
-      
+
       # Logs and databases
       "*.log"
       "*.sqlite"
-      
+
       # Environment files
       ".env.local"
       ".env.*.local"
@@ -165,58 +162,6 @@ in
   };
 
 
-  programs.mise = {
-    enable = true;
-    enableZshIntegration = true;
-    
-    # Global defaults - loose constraints that projects can override
-    globalConfig = {
-      tools = {
-        # Language runtimes with flexible versions
-        node = "lts";
-        python = "3.12";     # Recommended stable
-        go = "1.24";         # Latest stable
-        rust = "stable";     # Latest stable
-        
-        # Global CLI tools
-        "cargo:eza" = "latest";        # Modern ls replacement
-        "cargo:vivid" = "latest";      # LS_COLORS generator
-        
-        # npm packages
-        "npm:pnpm" = "latest";                      # Fast, disk space efficient package manager
-        "npm:@anthropic-ai/claude-code" = "latest";  # Claude Code CLI
-        "npm:ccusage" = "latest";                  # Claude usage tracking
-        "npm:@google/gemini-cli" = "latest";       # Gemini CLI
-        "npm:opencode-ai" = "latest";              # OpenCode AI
-        "npm:repomix" = "latest";                  # Repository to single file converter
-        "npm:@steipete/poltergeist" = "latest";    # Website automation tool
-        "npm:@openai/codex" = "latest";            # OpenAI Codex CLI
-        
-        # iOS/macOS development
-        tuist = "latest";                          # Xcode project generation
-      };
-    };
-    
-    settings = {
-      # Support legacy version files from other tools
-      legacy_version_file = true;  # .nvmrc, .python-version, etc.
-      
-      # Enable idiomatic version files for Python
-      idiomatic_version_file_enable_tools = ["python"];
-      
-      # Don't auto-install missing tools (explicit is better)
-      experimental = false;
-      
-      # Disable specific tools if needed
-      disable_tools = [];
-      
-      # Trusted configuration files (avoid security prompts)
-      trusted_config_paths = [
-        "~/.config/mise"
-        "~/Documents"  # Adjust to your project root
-      ];
-    };
-  };
 
   home.file = {
     # nvim config is symlinked manually via activation script to allow writes
@@ -243,13 +188,27 @@ in
       fi
       ln -sf "$HOME/.config/nix/dotfiles/nvim" "$HOME/.config/nvim"
     '';
-    
+
     claudeConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
       mkdir -p "$HOME/.claude"
       if [ -L "$HOME/.claude/CLAUDE.md" ] || [ -e "$HOME/.claude/CLAUDE.md" ]; then
         rm -f "$HOME/.claude/CLAUDE.md"
       fi
       ln -sf "$HOME/.config/nix/dotfiles/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+    '';
+
+    installGlobalNpmPackages = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      # Install global npm packages to ~/.npm-global
+      mkdir -p "$HOME/.npm-global"
+      export PATH="${pkgs.nodejs_22}/bin:$PATH"
+      $DRY_RUN_CMD npm install -g --prefix="$HOME/.npm-global" \
+        @anthropic-ai/claude-code \
+        ccusage \
+        @google/gemini-cli \
+        opencode-ai \
+        repomix \
+        @steipete/poltergeist \
+        @openai/codex
     '';
   };
 }
