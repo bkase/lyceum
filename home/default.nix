@@ -59,16 +59,10 @@ in
     # Networking
     cloudflared
 
-    # Language runtimes
-    nodejs_22
-    python312
-    go_1_24
-    rustup
-
     # CLI tools
     eza           # Modern ls replacement
     vivid         # LS_COLORS generator
-    nodePackages.pnpm
+    devenv        # Development environment manager
 
     # Your custom tools
     cx  # comma replacement
