@@ -38,6 +38,8 @@
       "vibetunnel"
       "ghostty"
       "iina"
+      "multipass"
+      "xquartz"
     ];
     
     masApps = {
