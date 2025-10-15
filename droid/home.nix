@@ -5,6 +5,9 @@
     ../common/home.nix
   ];
 
+  # Override username for nix-on-droid
+  home.username = lib.mkForce "nix-on-droid";
+
   # Android/Termux home directory
   home.homeDirectory = "/data/data/com.termux.nix/files/home";
 
