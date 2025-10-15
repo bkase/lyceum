@@ -69,7 +69,8 @@
 
   programs.zsh = {
     enable = true;
-    initContent = ''
+    # Using initExtra for now (initContent requires newer home-manager)
+    initExtra = ''
       # Add ~/.local/bin to PATH
       export PATH="$HOME/.local/bin:$PATH"
     '';
