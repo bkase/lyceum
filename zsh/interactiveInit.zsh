@@ -2,8 +2,22 @@ export HISTFILE=~/.zshistory;
 export HISTSIZE=100000;
 export SAVEHIST=100000;
 
-# Nix
-if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+# Platform detection
+if [[ "$(uname)" == "Darwin" ]]; then
+  IS_MACOS=true
+  IS_ANDROID=false
+else
+  IS_MACOS=false
+  # Check if we're on Android/Termux
+  if [[ -d "/data/data/com.termux" ]] || [[ "$PREFIX" == *"com.termux"* ]]; then
+    IS_ANDROID=true
+  else
+    IS_ANDROID=false
+  fi
+fi
+
+# Nix - only on macOS (nix-on-droid handles this differently)
+if [[ "$IS_MACOS" == true ]] && [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
   . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
 fi
 # End Nix
@@ -53,8 +67,14 @@ alias l="ls"
 alias mv="mv -i"
 alias cp="cp -i"
 alias rm="rm -i"
-alias c="clear && archey"
-alias cls="clear && archey && ls"
+# Platform-specific clear commands
+if [[ "$IS_MACOS" == true ]]; then
+  alias c="clear && archey"
+  alias cls="clear && archey && ls"
+else
+  alias c="clear"
+  alias cls="clear && ls"
+fi
 alias gc="git commit"
 alias wlog="git log --decorate --oneline"
 alias gl="git log --decorate"
@@ -68,8 +88,16 @@ alias gd="git diff"
 alias gf="git fetch"
 alias gcl="git clone"
 alias gb="git branch"
-alias rebuild="darwin-rebuild switch --flake ~/.config/nix"
-alias update="cd ~/.config/nix && nix flake update && rebuild"
+# Platform-specific rebuild commands
+if [[ "$IS_MACOS" == true ]]; then
+  alias rebuild="darwin-rebuild switch --flake ~/.config/nix"
+  alias update="cd ~/.config/nix && nix flake update && rebuild"
+elif [[ "$IS_ANDROID" == true ]]; then
+  alias rebuild="nix-on-droid switch --flake ~/.config/nix"
+  alias update="cd ~/.config/nix && nix flake update && rebuild"
+else
+  alias rebuild="echo 'Platform not recognized for rebuild command'"
+fi
 
 eval "$(scmpuff init -s)"
 
@@ -92,27 +120,25 @@ _gen_fzf_default_opts() {
 }
 _gen_fzf_default_opts
 
-# Search google chrome history with fzf
-ch() {
-  local cols sep google_history open
-  cols=$(( COLUMNS / 3 ))
-  sep='{::}'
+# Search google chrome history with fzf - only on platforms with Chrome
+if [[ "$IS_MACOS" == true ]]; then
+  ch() {
+    local cols sep google_history open
+    cols=$(( COLUMNS / 3 ))
+    sep='{::}'
 
-  if [ "$(uname)" = "Darwin" ]; then
     google_history="$HOME/Library/Application Support/Google/Chrome/Default/History"
     open=open
-  else
-    google_history="$HOME/.config/google-chrome/Default/History"
-    open=xdg-open
-  fi
-  rm -rf /tmp/h
-  cp -f "$google_history" /tmp/h
-  sqlite3 -separator $sep /tmp/h \
-    "select substr(title, 1, $cols), url
-     from urls order by last_visit_time desc" |
-  awk -F $sep '{printf "%-'$cols's  \x1b[36m%s\x1b[m\n", $1, $2}' |
-  fzf --ansi --multi | sed 's#.*\(https*://\)#\1#' | xargs $open > /dev/null 2> /dev/null
-}
+
+    rm -rf /tmp/h
+    cp -f "$google_history" /tmp/h
+    sqlite3 -separator $sep /tmp/h \
+      "select substr(title, 1, $cols), url
+       from urls order by last_visit_time desc" |
+    awk -F $sep '{printf "%-'$cols's  \x1b[36m%s\x1b[m\n", $1, $2}' |
+    fzf --ansi --multi | sed 's#.*\(https*://\)#\1#' | xargs $open > /dev/null 2> /dev/null
+  }
+fi
 
 # fasd
 fasd_cache="$HOME/.fasd-init-bash"
@@ -142,8 +168,11 @@ vf() {
 export NIX_PATH="nixpkgs=/nix/var/nix/profiles/per-user/root/channels/nixpkgs:darwin-config=$HOME/.nixpkgs/darwin-configuration.nix:/nix/var/nix/profiles/per-user/root/channels:$HOME/.nix-defexpr/channels"
 export NIX_SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt"
 
-export WASMER_DIR="/Users/bkase/.wasmer"
-[ -s "$WASMER_DIR/wasmer.sh" ] && source "$WASMER_DIR/wasmer.sh"
+# Wasmer - only on macOS
+if [[ "$IS_MACOS" == true ]]; then
+  export WASMER_DIR="/Users/bkase/.wasmer"
+  [ -s "$WASMER_DIR/wasmer.sh" ] && source "$WASMER_DIR/wasmer.sh"
+fi
 
 # Add npm global packages to PATH
 export PATH="$HOME/.npm-global/bin:$PATH"
