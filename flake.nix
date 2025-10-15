@@ -66,6 +66,7 @@
 
       # Android configuration
       nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration {
+        pkgs = droidPkgs;
         modules = [
           ./droid/default.nix
           {
