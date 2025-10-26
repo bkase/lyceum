@@ -72,7 +72,7 @@ For project-specific versions, use `nix develop` shells or direnv.
 To get bleeding-edge npm packages while maintaining declarative configuration, we use home-manager activation scripts that run `npm install -g` to `~/.npm-global/bin` on every rebuild. This gives us:
 
 - Latest versions from npm registry
-- Declarative package list in `home/default.nix`
+- Declarative package list in `common/home.nix`
 - No need to manually manage global packages
 
 Packages installed this way:
@@ -125,9 +125,9 @@ cx <tool>  # e.g., cx wget, cx htop
 
 ### Adding Applications
 
-- **GUI Apps**: Edit `darwin/default.nix` (Homebrew casks) or `home/default.nix` (Mac App Store)
-- **CLI Tools**: Add to `home.packages` in `home/default.nix`
-- **npm Packages**: Add to the activation script in `home/default.nix`
+- **GUI Apps**: Edit `darwin/default.nix` (Homebrew casks and Mac App Store)
+- **CLI Tools**: Add to `common/packages.nix`
+- **npm Packages**: Add to the activation script in `common/home.nix`
 
 ## Bootstrap Process
 

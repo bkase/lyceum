@@ -24,13 +24,17 @@ This is a declarative macOS configuration using Nix, nix-darwin, and home-manage
 ```
 ~/.config/nix/
 ├── flake.nix          # Main entry point, defines inputs and system
-├── darwin/            # System-level configuration
-│   └── default.nix    # macOS system settings, services
-├── home/              # User-level configuration
-│   └── default.nix    # User packages, dotfiles, npm globals
+├── darwin/            # macOS-specific configuration
+│   ├── default.nix    # macOS system settings, services
+│   └── home.nix       # macOS-specific home-manager imports
+├── common/            # Shared configuration across platforms
+│   ├── home.nix       # User packages, dotfiles, activation scripts
+│   ├── packages.nix   # Declarative package list
+│   └── programs.nix   # Program-specific configurations
 ├── dotfiles/          # Application configs (symlinked by home-manager)
 │   ├── nvim/          # Neovim configuration
 │   ├── ghostty/       # Terminal emulator config
+│   ├── zellij/        # Zellij terminal multiplexer config
 │   └── claude-commands/ # Custom Claude Code commands
 └── zsh/               # Zsh interactive init
     └── interactiveInit.zsh
@@ -54,8 +58,9 @@ This is a declarative macOS configuration using Nix, nix-darwin, and home-manage
 
 1. **Dotfile Changes**: Changes to files in `~/.config/nvim` modify the Git repo directly due to symlinks. Commit these changes periodically.
 
-2. **Adding GUI Apps**: Edit `darwin/default.nix` (Homebrew casks) or `home/default.nix` (Mac App Store apps).
+2. **Adding Packages**:
+   - **GUI Apps**: Edit `darwin/default.nix` (Homebrew casks and Mac App Store apps)
+   - **CLI Tools**: Add to `common/packages.nix`
+   - **npm Global Packages**: Edit the activation script in `common/home.nix`
 
 3. **Language Toolchains**: Language runtimes (Node.js, Python, Go, Rust) are installed globally via Nix. For project-specific versions, use `nix develop` shells or direnv.
-
-4. **npm Global Packages**: Managed declaratively via activation scripts in `home/default.nix`. They're installed to `~/.npm-global/bin` and updated on every rebuild. To add a package, add it to the activation script's npm install command.

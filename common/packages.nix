@@ -9,6 +9,7 @@ with pkgs; [
 
   # Terminal multiplexer
   tmux
+  zellij
 
   # Shell enhancements
   fzf

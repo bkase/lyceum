@@ -1,0 +1,44 @@
+// Zellij Configuration with Gruvbox Light theme
+
+// Theme configuration
+theme "gruvbox-light"
+
+themes {
+    gruvbox-light {
+        fg "#3c3836"      // fg0
+        bg "#fbf1c7"      // bg0
+        black "#fbf1c7"   // bg0
+        red "#cc241d"     // red
+        green "#98971a"   // green
+        yellow "#d79921"  // yellow
+        blue "#458588"    // blue
+        magenta "#b16286" // purple
+        cyan "#689d6a"    // aqua
+        white "#3c3836"   // fg0
+        orange "#d65d0e"  // orange
+    }
+}
+
+// General settings
+default_shell "zsh"
+pane_frames false
+simplified_ui false
+default_layout "compact"
+mouse_mode true
+copy_on_select true
+
+// Keybindings
+keybinds {
+    normal {
+        // Unbind Ctrl+q to avoid accidental quits
+        unbind "Ctrl q"
+    }
+
+    shared_except "locked" {
+        bind "Ctrl y" {
+            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/zellij_forgot.wasm" {
+                floating true
+            }
+        }
+    }
+}

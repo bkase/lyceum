@@ -5,6 +5,12 @@ let
 
   # Common packages shared between platforms
   commonPackages = import ./packages.nix { inherit pkgs; };
+
+  # Zellij forgot plugin
+  zellijForgotPlugin = pkgs.fetchurl {
+    url = "https://github.com/karimould/zellij-forgot/releases/download/0.4.2/zellij_forgot.wasm";
+    sha256 = "sha256-MRlBRVGdvcEoaFtFb5cDdDePoZ/J2nQvvkoyG6zkSds=";
+  };
 in
 
 {
@@ -44,6 +50,12 @@ in
       source = ../dotfiles/a4;
       executable = true;
     };
+
+    # Zellij config
+    ".config/zellij/config.kdl".source = ../dotfiles/zellij/config.kdl;
+
+    # Zellij plugins
+    ".config/zellij/plugins/zellij_forgot.wasm".source = zellijForgotPlugin;
   };
 
   # Common activation scripts

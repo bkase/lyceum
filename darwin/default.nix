@@ -27,7 +27,9 @@
       upgrade = true;
     };
     
-    taps = [];
+    taps = [
+      "nikitabobko/tap"
+    ];
     brews = [];
     casks = [
       "lm-studio"
@@ -40,6 +42,7 @@
       "iina"
       "multipass"
       "xquartz"
+      "aerospace"
     ];
     
     masApps = {
