@@ -86,7 +86,8 @@ in
         opencode-ai \
         repomix \
         @steipete/poltergeist \
-        @openai/codex
+        @openai/codex \
+        bun
     '';
   };
 }
