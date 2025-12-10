@@ -34,6 +34,7 @@ with pkgs; [
 
   # Language runtimes
   nodejs_22
+  uv            # Python package manager
 
   # CLI tools
   eza           # Modern ls replacement
