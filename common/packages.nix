@@ -40,4 +40,9 @@ with pkgs; [
   eza           # Modern ls replacement
   vivid         # LS_COLORS generator
   devenv        # Development environment manager
+  ripgrep       # Fast grep alternative (rg)
+  rustup        # Rust toolchain manager
+
+  # Build tools
+  cmake
 ]
