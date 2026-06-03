@@ -3,6 +3,7 @@
 with pkgs; [
   # Version control
   git
+  jujutsu      # Git-compatible VCS (jj)
 
   # Editors
   neovim
@@ -31,9 +32,10 @@ with pkgs; [
 
   # Networking
   cloudflared
+  mosh          # Mobile shell (client and server)
 
   # Language runtimes
-  nodejs_22
+  nodejs_24
   uv            # Python package manager
 
   # CLI tools
@@ -42,7 +44,9 @@ with pkgs; [
   devenv        # Development environment manager
   ripgrep       # Fast grep alternative (rg)
   rustup        # Rust toolchain manager
+  zig
 
   # Build tools
   cmake
+  xcodegen
 ]

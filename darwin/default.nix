@@ -25,12 +25,17 @@
       autoUpdate = true;
       cleanup = "zap";
       upgrade = true;
+      extraFlags = [ "--force-cleanup" ];
     };
     
     taps = [
+      "neurosnap/tap"
       "nikitabobko/tap"
+      "steipete/tap"
     ];
-    brews = [];
+    brews = [
+      "neurosnap/tap/zmx"
+    ];
     casks = [
       "lm-studio"
       "torguard"
@@ -43,6 +48,7 @@
       "multipass"
       "xquartz"
       "aerospace"
+      "codexbar"
     ];
     
     masApps = {

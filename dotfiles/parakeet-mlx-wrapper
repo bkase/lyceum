@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Wrapper around parakeet-mlx for summarize's ONNX transcriber interface.
+# Accepts a WAV audio file as the last argument, transcribes with MLX Parakeet,
+# and prints the transcript text to stdout.
+# Note: summarize pre-converts audio to 16kHz mono WAV via ffmpeg before calling this.
+set -euo pipefail
+
+INPUT=""
+for arg in "$@"; do
+  INPUT="$arg"
+done
+
+if [[ -z "$INPUT" || ! -f "$INPUT" ]]; then
+  echo "Usage: parakeet-mlx-wrapper <audio-file>" >&2
+  exit 1
+fi
+
+TMPDIR_OUT="$(mktemp -d)"
+trap 'rm -rf "$TMPDIR_OUT"' EXIT
+
+parakeet-mlx "$INPUT" --output-dir "$TMPDIR_OUT" --output-format txt >&2
+
+TXT_FILE="$(find "$TMPDIR_OUT" -name '*.txt' -print -quit)"
+if [[ -n "$TXT_FILE" && -f "$TXT_FILE" ]]; then
+  cat "$TXT_FILE"
+else
+  echo "Error: parakeet-mlx produced no output" >&2
+  exit 1
+fi

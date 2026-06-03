@@ -29,6 +29,7 @@ in
     EDITOR = "nvim";
     LANG = "en_US.UTF-8";
     LC_ALL = "en_US.UTF-8";
+    SUMMARIZE_ONNX_PARAKEET_CMD = ''["parakeet-mlx-wrapper", "{input}"]'';
   };
 
   home.sessionPath = [
@@ -50,6 +51,18 @@ in
       source = ../dotfiles/a4;
       executable = true;
     };
+
+    # parakeet-mlx wrapper for summarize transcriber
+    ".local/bin/parakeet-mlx-wrapper" = {
+      source = ../dotfiles/parakeet-mlx-wrapper;
+      executable = true;
+    };
+
+    # Bun config: defer installs of packages newer than 7 days (supply chain protection)
+    ".bunfig.toml".text = ''
+      [install]
+      minimumReleaseAge = 604800
+    '';
 
     # Zellij config
     ".config/zellij/config.kdl".source = ../dotfiles/zellij/config.kdl;
@@ -78,16 +91,31 @@ in
     installGlobalNpmPackages = lib.hm.dag.entryAfter ["writeBoundary"] ''
       # Install global npm packages to ~/.npm-global
       mkdir -p "$HOME/.npm-global"
-      export PATH="${pkgs.nodejs_22}/bin:$PATH"
+      export PATH="${pkgs.nodejs_24}/bin:$PATH"
       $DRY_RUN_CMD npm install -g --prefix="$HOME/.npm-global" \
+        npm@latest \
         @anthropic-ai/claude-code \
-        ccusage \
         @google/gemini-cli \
-        opencode-ai \
+        @mariozechner/pi-coding-agent \
         repomix \
         @steipete/poltergeist \
         @openai/codex \
-        bun
+        bun \
+        @steipete/summarize \
+        acpx
+    '';
+
+    # Ensure ~/.npmrc has min-release-age=7 (supply chain protection) without
+    # clobbering other lines (e.g. auth tokens added by `npm login`).
+    npmrcMinReleaseAge = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      NPMRC="$HOME/.npmrc"
+      touch "$NPMRC"
+      if ${pkgs.gnugrep}/bin/grep -q "^min-release-age=" "$NPMRC"; then
+        ${pkgs.gnused}/bin/sed -i.bak "s/^min-release-age=.*/min-release-age=7/" "$NPMRC"
+        rm -f "$NPMRC.bak"
+      else
+        echo "min-release-age=7" >> "$NPMRC"
+      fi
     '';
   };
 }

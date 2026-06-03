@@ -178,3 +178,6 @@ fi
 export PATH="$HOME/.npm-global/bin:$PATH"
 
 eval "$(direnv hook zsh)"
+
+# mise (runtime version manager)
+eval "$(/Users/bkase/.local/bin/mise activate zsh)"

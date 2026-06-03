@@ -4,3 +4,11 @@ theme = Gruvbox Light
 cursor-style = block
 cursor-style-blink = true
 keybind = shift+enter=text:\n
+
+# Ghostty auto-injects OSC 133 semantic-prompt marks into PS1. When Pure
+# fires `zle .reset-prompt` from its async git check after `claude
+# --dangerously-skip-permissions` exits, the re-emitted `133;A;cl=line`
+# triggers Ghostty's fresh-line behavior and the preprompt stacks each
+# cycle. Pure sets its own terminal title, so we lose nothing meaningful.
+shell-integration = none
+
