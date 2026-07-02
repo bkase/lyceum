@@ -18,11 +18,6 @@ require("lazy").setup({
   spec = {
     -- add LazyVim and import its plugins
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
-    -- Pin mason-lspconfig to a version before v2.0.0 to fix compatibility
-    {
-      "williamboman/mason-lspconfig.nvim",
-      version = "v1.*",
-    },
     -- import/override with your plugins
     { import = "plugins" },
   },

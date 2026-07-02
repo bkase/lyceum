@@ -7,6 +7,7 @@ with pkgs; [
 
   # Editors
   neovim
+  tree-sitter    # CLI required by nvim-treesitter (main branch) to build parsers
 
   # Terminal multiplexer
   tmux
