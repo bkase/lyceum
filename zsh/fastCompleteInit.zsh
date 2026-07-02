@@ -8,7 +8,10 @@ _update_zcomp() {
     setopt local_options
     setopt extendedglob
     autoload -Uz compinit
-    local zcompf="$1/zcompdump"
+    # Key the dump by zsh version: a fixed name goes stale across zsh/nixpkgs
+    # upgrades and `compinit -C` would keep reusing the stale dump, silently
+    # breaking completion until the daily rebuild.
+    local zcompf="$1/zcompdump-$ZSH_VERSION"
     # use a separate file to determine when to regenerate, as compinit doesn't
     # always need to modify the compdump
         local zcompf_a="$zcompf"".augur"
