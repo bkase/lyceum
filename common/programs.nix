@@ -3,8 +3,6 @@
 {
   programs.git = {
     enable = true;
-    userName = "bkase";
-    userEmail = "brandernan@gmail.com";
 
     ignores = [
       # macOS
@@ -36,12 +34,14 @@
       ".env.*.local"
     ];
 
-    extraConfig = {
+    settings = {
       init.defaultBranch = "main";
       push.autoSetupRemote = true;
       pull.rebase = true;
       rebase.autoStash = true;
       core.editor = "nvim";
+      user.email = "brandernan@gmail.com";
+      user.name = "bkase";
     };
   };
 

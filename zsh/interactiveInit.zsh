@@ -140,29 +140,13 @@ if [[ "$IS_MACOS" == true ]]; then
   }
 fi
 
-# fasd
-fasd_cache="$HOME/.fasd-init-bash"
-if [ "$(command -v fasd)" -nt "$fasd_cache" -o ! -s "$fasd_cache" ]; then
-  fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install >| "$fasd_cache"
-fi
-source "$fasd_cache"
-unset fasd_cache
+# zoxide — smarter directory jumping (replaces fasd); keeps the `j` command
+eval "$(zoxide init --cmd j zsh)"
 
-# (FASD + fzf || find . + fzf) do
-# $1 = flag for files (-f) or directories (-d)
-# $2 = format string for command to run
-# $3 = any arguments to fasd directly
-_fasd_do() {
-  local res
-  res=$(fasd -Rl -$1 "$3" | fzf -1 -0 --no-sort +m || find . -type $1 -print0 | grep -FzZ '*'"$3"'*' | fzf +m) && $(printf "$2" "$res") || return 1
-}
-
-j() {
-  _fasd_do d "cd %s" "$*"
-}
-
+# fuzzy file finder → open in $EDITOR (replaces fasd's `vf`)
 vf() {
-  _fasd_do f "vim %s" "$*"
+  local res
+  res=$(rg --files 2>/dev/null | fzf -1 -0 --no-sort +m --query "$*") && ${EDITOR:-nvim} "$res"
 }
 
 export NIX_PATH="nixpkgs=/nix/var/nix/profiles/per-user/root/channels/nixpkgs:darwin-config=$HOME/.nixpkgs/darwin-configuration.nix:/nix/var/nix/profiles/per-user/root/channels:$HOME/.nix-defexpr/channels"

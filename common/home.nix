@@ -46,6 +46,14 @@ in
       recursive = true;
     };
 
+    # Editable, in-place symlinks into the repo so edits land in git directly.
+    ".config/nvim".source =
+      config.lib.file.mkOutOfStoreSymlink
+        "${config.home.homeDirectory}/.config/nix/dotfiles/nvim";
+    ".claude/CLAUDE.md".source =
+      config.lib.file.mkOutOfStoreSymlink
+        "${config.home.homeDirectory}/.config/nix/dotfiles/claude/CLAUDE.md";
+
     # a4 development shim
     ".local/bin/a4" = {
       source = ../dotfiles/a4;
@@ -73,21 +81,6 @@ in
 
   # Common activation scripts
   home.activation = {
-    nvimConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      if [ -L "$HOME/.config/nvim" ] || [ -e "$HOME/.config/nvim" ]; then
-        rm -rf "$HOME/.config/nvim"
-      fi
-      ln -sf "$HOME/.config/nix/dotfiles/nvim" "$HOME/.config/nvim"
-    '';
-
-    claudeConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      mkdir -p "$HOME/.claude"
-      if [ -L "$HOME/.claude/CLAUDE.md" ] || [ -e "$HOME/.claude/CLAUDE.md" ]; then
-        rm -f "$HOME/.claude/CLAUDE.md"
-      fi
-      ln -sf "$HOME/.config/nix/dotfiles/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
-    '';
-
     installGlobalNpmPackages = lib.hm.dag.entryAfter ["writeBoundary"] ''
       # Install global npm packages to ~/.npm-global
       mkdir -p "$HOME/.npm-global"
@@ -100,7 +93,6 @@ in
         repomix \
         @steipete/poltergeist \
         @openai/codex \
-        bun \
         @steipete/summarize \
         acpx
     '';

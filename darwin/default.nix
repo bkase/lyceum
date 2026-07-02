@@ -22,15 +22,16 @@
   homebrew = {
     enable = true;
     onActivation = {
-      autoUpdate = true;
+      # Keep `darwin-rebuild switch` reproducible: don't refresh taps or bump
+      # versions on every rebuild. Run `brew update && brew upgrade` explicitly.
+      autoUpdate = false;
+      upgrade = false;
       cleanup = "zap";
-      upgrade = true;
       extraFlags = [ "--force-cleanup" ];
     };
     
     taps = [
       "neurosnap/tap"
-      "nikitabobko/tap"
       "steipete/tap"
     ];
     brews = [
@@ -39,16 +40,14 @@
     casks = [
       "lm-studio"
       "torguard"
-      "claude"
       "google-chrome"
       "arq"
-      "vibetunnel"
       "ghostty"
       "iina"
       "multipass"
       "xquartz"
-      "aerospace"
       "codexbar"
+      "obsidian"
     ];
     
     masApps = {
@@ -56,7 +55,8 @@
     };
   };
 
-  services.tailscale.enable = true;
+  # Tailscale is provided by the Mac App Store app above (masApps). Do not also
+  # enable services.tailscale — the nix-darwin daemon conflicts with the GUI app.
 
   system = {
     stateVersion = 5;

@@ -28,7 +28,6 @@ with pkgs; [
 
   # Shell integration
   scmpuff
-  fasd
 
   # Networking
   cloudflared
@@ -36,6 +35,7 @@ with pkgs; [
 
   # Language runtimes
   nodejs_24
+  bun           # JS runtime & package manager
   uv            # Python package manager
 
   # CLI tools
@@ -45,6 +45,7 @@ with pkgs; [
   ripgrep       # Fast grep alternative (rg)
   rustup        # Rust toolchain manager
   zig
+  ffmpeg        # Audio/video processing
 
   # Build tools
   cmake
