@@ -89,7 +89,7 @@ in
         npm@latest \
         @anthropic-ai/claude-code \
         @google/gemini-cli \
-        @mariozechner/pi-coding-agent \
+        @earendil-works/pi-coding-agent \
         repomix \
         @steipete/poltergeist \
         @openai/codex \
@@ -99,15 +99,25 @@ in
 
     # Ensure ~/.npmrc has min-release-age=7 (supply chain protection) without
     # clobbering other lines (e.g. auth tokens added by `npm login`).
+    # Claude Code is excluded from the floor so rebuilds and its auto-updater
+    # pick up the latest release immediately. The native binary is a separate
+    # optional dep pinned to the same version, so it must be excluded too or
+    # npm silently skips it. npm 12 blocks install scripts by default; Claude
+    # Code's postinstall places its native binary, so allow it.
     npmrcMinReleaseAge = lib.hm.dag.entryAfter ["writeBoundary"] ''
       NPMRC="$HOME/.npmrc"
       touch "$NPMRC"
-      if ${pkgs.gnugrep}/bin/grep -q "^min-release-age=" "$NPMRC"; then
-        ${pkgs.gnused}/bin/sed -i.bak "s/^min-release-age=.*/min-release-age=7/" "$NPMRC"
-        rm -f "$NPMRC.bak"
-      else
-        echo "min-release-age=7" >> "$NPMRC"
-      fi
+      setKey() {
+        if ${pkgs.gnugrep}/bin/grep -q "^$1=" "$NPMRC"; then
+          ${pkgs.gnused}/bin/sed -i.bak "s|^$1=.*|$1=$2|" "$NPMRC"
+          rm -f "$NPMRC.bak"
+        else
+          echo "$1=$2" >> "$NPMRC"
+        fi
+      }
+      setKey min-release-age 7
+      setKey min-release-age-exclude @anthropic-ai/claude-code,@anthropic-ai/claude-code-darwin-arm64
+      setKey allow-scripts @anthropic-ai/claude-code
     '';
   };
 }

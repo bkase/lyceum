@@ -33,6 +33,10 @@
     taps = [
       "neurosnap/tap"
       "steipete/tap"
+      # aerospace lives in this third-party tap. It is not an official cask, so
+      # Homebrew requires the tap to be trusted (`brew trust nikitabobko/tap`,
+      # stored in ~/.homebrew/trust.json) before `brew bundle` will load it.
+      "nikitabobko/tap"
     ];
     brews = [
       "neurosnap/tap/zmx"
@@ -48,15 +52,21 @@
       "xquartz"
       "codexbar"
       "obsidian"
+      "claude"
+      "vibetunnel"
+      "nikitabobko/tap/aerospace"
     ];
     
-    masApps = {
-      "Tailscale" = 1475387142;
-    };
+    # Tailscale (App Store id 1475387142) is installed manually from the Mac App
+    # Store, not declared in masApps. `mas` 6 detects installed apps via Spotlight;
+    # this machine's Spotlight index does not cover /Applications, so brew bundle
+    # thinks Tailscale is missing and hangs on `mas install`. Reinstate the masApps
+    # entry once `mas list` shows Tailscale (e.g. after `sudo mdutil -E /`).
+    masApps = { };
   };
 
-  # Tailscale is provided by the Mac App Store app above (masApps). Do not also
-  # enable services.tailscale — the nix-darwin daemon conflicts with the GUI app.
+  # Do not enable services.tailscale — the nix-darwin daemon conflicts with the
+  # Tailscale GUI app.
 
   system = {
     stateVersion = 5;
