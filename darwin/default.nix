@@ -40,6 +40,7 @@
     ];
     brews = [
       "neurosnap/tap/zmx"
+      "steipete/tap/crabbox"
     ];
     casks = [
       "lm-studio"
